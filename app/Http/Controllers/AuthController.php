@@ -179,13 +179,27 @@ class AuthController extends Controller
         $user->save();
 
         // ENVIAR CORREO
-        Mail::to($user->correo)
-            ->send(
-                new Codigo2FA(
-                    $user->nombre,
-                    $codigo
-                )
-            );
+        try {
+
+            Mail::to($user->correo)
+                ->send(
+                    new Codigo2FA(
+                        $user->nombre,
+                        $codigo
+                    )
+                );
+
+                } catch (\Exception $e) {
+
+                    return response()->json([
+
+                        'success' => false,
+                        'message' => 'Error al enviar correo',
+                        'error' => $e->getMessage()
+
+                    ], 500);
+
+                }
 
             // RESPUESTA
             return response()->json([
