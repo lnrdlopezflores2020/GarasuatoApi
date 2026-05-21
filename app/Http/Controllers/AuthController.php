@@ -137,63 +137,63 @@ class AuthController extends Controller
 
         // LOGIN API
     public function apiLogin(Request $request)
-{
+    {
 
-    $request->validate([
+        $request->validate([
 
-        'correo' => 'required|email',
-        'contrasena' => 'required'
-
-    ]);
-
-    $user = User::where(
-        'correo',
-        $request->correo
-    )->first();
-
-    if (
-        !$user ||
-        !Hash::check(
-            $request->contrasena,
-            $user->contrasena
-        )
-    ) {
-
-        return response()->json([
-
-            'success' => false,
-            'message' => 'Credenciales incorrectas'
-
-        ], 401);
-
-    }
-
-    // GENERAR CÓDIGO
-    $codigo = rand(100000, 999999);
-
-    $user->codigo_2fa = $codigo;
-
-    $user->expira_2fa = Carbon::now()
-        ->addMinutes(5);
-
-    $user->save();
-
-    // ENVIAR CORREO
-    Mail::to($user->correo)
-        ->send(
-            new Codigo2FA(
-                $user->nombre,
-                $codigo
-            )
-        );
-
-        // RESPUESTA
-        return response()->json([
-
-            'success' => true,
-            'message' => 'Código enviado'
+            'correo' => 'required|email',
+            'contrasena' => 'required'
 
         ]);
+
+        $user = User::where(
+            'correo',
+            $request->correo
+        )->first();
+
+        if (
+            !$user ||
+            !Hash::check(
+                $request->contrasena,
+                $user->contrasena
+            )
+        ) {
+
+            return response()->json([
+
+                'success' => false,
+                'message' => 'Credenciales incorrectas'
+
+            ], 401);
+
+        }
+
+        // GENERAR CÓDIGO
+        $codigo = rand(100000, 999999);
+
+        $user->codigo_2fa = $codigo;
+
+        $user->expira_2fa = Carbon::now()
+            ->addMinutes(5);
+
+        $user->save();
+
+        // ENVIAR CORREO
+        Mail::to($user->correo)
+            ->send(
+                new Codigo2FA(
+                    $user->nombre,
+                    $codigo
+                )
+            );
+
+            // RESPUESTA
+            return response()->json([
+
+                'success' => true,
+                'message' => 'Código enviado'
+
+            ]);
 
     }
     public function apiVerificar2FA(Request $request)
