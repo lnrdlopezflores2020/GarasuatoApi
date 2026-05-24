@@ -176,10 +176,7 @@ public function apiActualizarFoto(Request $request)
     $user->save();
 
     return response()->json([
-
-        'success' => true,
         'foto' => $ruta
-
     ]);
 
 }
