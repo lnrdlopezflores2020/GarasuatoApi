@@ -139,78 +139,43 @@ class AuthController extends Controller
         // LOGIN API
     public function apiLogin(Request $request)
     {
-
         $request->validate([
-
             'correo' => 'required|email',
             'contrasena' => 'required'
-
         ]);
 
-        $user = User::where(
-            'correo',
-            $request->correo
-        )->first();
-
+        $user = User::where('correo', $request->correo)->first();
 
         if (
             !$user ||
-            !Hash::check(
-                $request->contrasena,
-                $user->contrasena
-            )
+            !Hash::check($request->contrasena, $user->contrasena)
         ) {
-
             return response()->json([
-
                 'success' => false,
                 'message' => 'Credenciales incorrectas'
-
             ], 401);
-
         }
 
-        // GENERAR CÓDIGO
         $codigo = rand(100000, 999999);
 
         $user->codigo_2fa = $codigo;
-
-        $user->expira_2fa = Carbon::now()
-            ->addMinutes(5);
-
+        $user->expira_2fa = Carbon::now()->addMinutes(5);
         $user->save();
 
-        // ENVIAR CORREO
-        try {
+        if (env('MAIL_MAILER') !== 'log') {
+            Mail::to($user->correo)->send(
+                new Codigo2FA(
+                    $user->nombre,
+                    $codigo
+                )
+            );
+        }
 
-            Mail::to($user->correo)
-                ->send(
-                    new Codigo2FA(
-                        $user->nombre,
-                        $codigo
-                    )
-                );
-
-                } catch (\Exception $e) {
-
-                    return response()->json([
-
-                        'success' => false,
-                        'message' => 'Error al enviar correo',
-                        'error' => $e->getMessage()
-
-                    ], 500);
-
-                }
-
-            // RESPUESTA
-            return response()->json([
-
-                'success' => true,
-                'message' => 'Código enviado'
-
-            ]);
-
+        return response()->json([
+            'success' => true,
+            'message' => 'Código enviado',
+            'codigo_prueba' => env('MAIL_MAILER') === 'log' ? $codigo : null
+        ]);
     }
     public function apiVerificar2FA(Request $request)
     {
