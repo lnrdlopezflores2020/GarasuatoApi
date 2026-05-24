@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 use App\Mail\Codigo2FA;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\DB;
 
 
 class AuthController extends Controller
@@ -150,6 +151,19 @@ class AuthController extends Controller
             'correo',
             $request->correo
         )->first();
+
+
+        return response()->json([
+
+            'correo_recibido' => $request->correo,
+
+            'usuario_encontrado' => $user ? true : false,
+
+            'ID_usu' => $user?->ID_usu,
+
+            'database' => DB::connection()->getDatabaseName()
+
+        ]);
 
         if (
             !$user ||
