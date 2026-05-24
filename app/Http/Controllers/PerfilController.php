@@ -149,34 +149,26 @@ public function apiActualizarFoto(Request $request)
 
     $user = $request->user();
 
-    // BORRAR FOTO ANTERIOR
-    if($user->foto_perfil){
-
-        Storage::disk('public')
-            ->delete($user->foto_perfil);
-
-    }
-
-    $nombre = 'user_' .
-        $user->ID_usu .
-        '.jpg';
-
-    $ruta = $request
-        ->file('foto')
-        ->storeAs(
-
-            'uploads/perfiles',
-            $nombre,
-            'public'
-
+    $upload = cloudinary()
+        ->upload(
+            $request->file('foto')->getRealPath(),
+            [
+                'folder' => 'garasuato/perfiles',
+                'public_id' => 'user_' . $user->ID_usu,
+                'overwrite' => true
+            ]
         );
 
-    $user->foto_perfil = $ruta;
+    $url = $upload->getSecurePath();
+
+    $user->foto_perfil = $url;
 
     $user->save();
 
     return response()->json([
-        'foto' => $ruta
+
+        'foto' => $url
+
     ]);
 
 }
