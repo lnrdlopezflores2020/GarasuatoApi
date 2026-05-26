@@ -88,4 +88,10 @@ Route::post( '/reenviar-2fa',[AuthController::class, 'apiReenviar2FA']);
 // Ruta para buscar por código postal
 Route::get('/cp/{cp}',[CPController::class, 'buscarCP']);
 
+// RUTAS PÚBLICAS PARA DEMOSTRACIÓN API
+Route::get('/demo/productos', [ProductoController::class, 'apiIndex']);
+Route::get('/demo/productos/{id}', [ProductoController::class, 'apiShow']);
 
+Route::get('/demo/dashboard/usuarios-mes', [DashboardController::class, 'usuariosPorMes']);
+Route::get('/demo/dashboard/ventas-mes', [DashboardController::class, 'ventasPorMes']);
+Route::get('/demo/dashboard/prediccion-compras', [DashboardController::class, 'prediccionCompras']);
